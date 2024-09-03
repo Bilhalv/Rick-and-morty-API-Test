@@ -2,56 +2,81 @@ import React, { useState, useEffect } from "react";
 import Card from "@/components/Card";
 import getCharacters from "@/hooks/getCharacters";
 import { Person } from "@/types/Person";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import getPages from "@/hooks/getPages";
 import { FontAwesome } from "@expo/vector-icons";
 import getFiltered from "@/hooks/getFiltered";
 
 export default function Index() {
   const [characters, setCharacters] = useState<Person[]>([]);
+  const inputRef = React.useRef<TextInput>(null);
 
   useEffect(() => {
-    async function fetchCharacters() {
-      const characters = await getCharacters(7);
-      setCharacters(characters);
+    async function fetchCharacters(page: number) {
+      const pages = await getPages();
+
+      if (page > pages) {
+        return;
+      }
+
+      const new_characters = await getCharacters(page);
+      setCharacters((prev) => [...prev, ...new_characters]);
+      fetchCharacters(page + 1);
     }
-    fetchCharacters();
+    fetchCharacters(1);
   }, []);
 
   return (
     <>
       <View style={styles.header}>
-        <FontAwesome style={styles.button} name="filter" size={20} color="white" />
-        <FontAwesome style={styles.button} name="sort" size={20} color="white" />
-        <View style={styles.search}>
-          <FontAwesome name="search" size={20} color="white" />
+        <View style={styles.button}>
+          <FontAwesome name="filter" size={20} color="white" />
+        </View>
+        <View style={styles.button}>
+          <FontAwesome name="sort" size={20} color="white" />
+        </View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            backgroundColor: "#3C3E44",
+            width: "100%",
+            height: "100%",
+            borderRadius: 10,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            alignItems: "center",
+          }}
+          onTouchStart={() => {
+            inputRef.current?.focus();
+          }}
+        >
+          <FontAwesome
+            name="search"
+            size={20}
+            color="white"
+            style={{ marginRight: 10 }}
+          />
           <TextInput
+            ref={inputRef}
             placeholder="Search"
+            placeholderTextColor={"#ffffff"}
+            style={{ flex: 1, color: "white" }}
             editable
-            onChangeText={(e) => {
-              async function fetchCharacters() {
-                const characters = await getFiltered({ name: e });
-                setCharacters(characters);
-              }
-              fetchCharacters();
+            onChangeText={async (e) => {
+              const characters = await getFiltered({ name: e });
+              setCharacters(characters);
             }}
-            style={{
-              color: "#ffffff",
-              width: "100%",
-              height: "100%",
-              fontSize: 12
+            onFocus={() => {
+              console.log("focus");
             }}
           />
         </View>
-        <FontAwesome style={styles.button} name="plus" size={20} color="white" />
+        <View style={styles.button}>
+          <FontAwesome name="plus" size={20} color="white" />
+        </View>
       </View>
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <ScrollView contentContainerStyle={{ paddingVertical: 20 }}>
         {characters && characters.length > 0 ? (
           characters.map((person: Person) => (
             <Card key={person.id} {...person} />
@@ -59,11 +84,10 @@ export default function Index() {
         ) : (
           <Text style={{ color: "#ffffff" }}>No characters found</Text>
         )}
-      </View>
+      </ScrollView>
     </>
   );
 }
-
 
 const styles = StyleSheet.create({
   header: {
@@ -74,11 +98,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   button: {
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#3C3E44",
     width: 40,
     height: 40,
     borderRadius: 100,
-    textAlign: "center",
   },
   search: {
     flex: 1,
@@ -90,6 +115,6 @@ const styles = StyleSheet.create({
     alignContent: "center",
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10
-  }
-})
+    borderRadius: 10,
+  },
+});

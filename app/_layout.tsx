@@ -5,16 +5,6 @@ import getPages from "@/hooks/getPages";
 import { useState, useEffect } from "react";
 
 export default function RootLayout() {
-  const [maxPages, setMaxPages] = useState<number>(0);
-
-  useEffect(() => {
-    async function fetchPages() {
-      const pages = await getPages();
-      setMaxPages(pages);
-    }
-
-    fetchPages();
-  }, []);
   return (
     <View style={{
       backgroundColor: "#272B33",
@@ -24,14 +14,6 @@ export default function RootLayout() {
       minHeight: "100%"
     }}>
       <Slot />
-      <View style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        gap: 10,
-        padding: 10
-      }}>
-        <Text style={{ color: "#ffffff" }}>Page 1 of {maxPages}</Text>
-      </View>
     </View>
   );
 }
