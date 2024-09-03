@@ -3,7 +3,7 @@ import { Text } from "react-native";
 
 export default function Card(person: Person) {
     return (
-        <Text>
+        <Text style={{color: 'white'}}>
             {person.name}
         </Text>
     )
