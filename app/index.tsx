@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Card from "@/components/Card";
 import getCharacters from "@/hooks/getCharacters";
 import { Person } from "@/types/Person";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import getPages from "@/hooks/getPages";
 import { FontAwesome } from "@expo/vector-icons";
 import getFiltered from "@/hooks/getFiltered";
@@ -11,18 +11,16 @@ import { Link } from "expo-router";
 export default function Index() {
   const [characters, setCharacters] = useState<Person[]>([]);
   const inputRef = React.useRef<TextInput>(null);
+  const [paginasCarregadas, setPaginasCarregadas] = useState(1);
 
   useEffect(() => {
-    async function fetchCharacters(page: number) {
+    async function fetchPages(page: number) {
       const pages = await getPages();
-
-      if (page > pages) {
-        return;
-      }
-
+      return pages < page
+    }
+    async function fetchCharacters(page: number) {
       const new_characters = await getCharacters(page);
       setCharacters((prev) => [...prev, ...new_characters]);
-      fetchCharacters(page + 1);
     }
     fetchCharacters(1);
   }, []);
@@ -64,8 +62,8 @@ export default function Index() {
             placeholderTextColor={"#ffffff"}
             style={{ flex: 1, color: "white" }}
             editable
-            onChangeText={async (e) => {
-              const characters = await getFiltered({ name: e });
+            onSubmitEditing={async (e) => {
+              const characters = await getFiltered({ name: e.nativeEvent.text });
               setCharacters(characters);
             }}
             onFocus={() => {
@@ -79,9 +77,29 @@ export default function Index() {
       </View>
       <ScrollView contentContainerStyle={{ paddingVertical: 20 }}>
         {characters && characters.length > 0 ? (
-          characters.map((person: Person) => (
-            <Card key={person.id} {...person} />
-          ))
+          <View style={{ gap: 20, flexDirection: "row", flexWrap: "wrap", justifyContent: "center" }}>
+            {characters.map((person: Person) => (
+              <Card key={person.id} {...person} />
+            ))}
+            {characters.length > 9 && (
+              <TouchableOpacity
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: 100,
+                  height: 100,
+                }}
+                onPress={async () => {
+                  if (paginasCarregadas+1 > await getPages()) return;
+                  const newCharacters = await getCharacters(paginasCarregadas + 1);
+                  setCharacters((prev) => [...prev, ...newCharacters]);
+                  setPaginasCarregadas((prev) => prev + 1);
+                }}
+              >
+                <FontAwesome name="arrow-down" size={40} color="white" />
+              </TouchableOpacity>
+            )}
+          </View>
         ) : (
           <Text style={{ color: "#ffffff" }}>No characters found</Text>
         )}
@@ -97,6 +115,7 @@ const styles = StyleSheet.create({
     gap: 10,
     position: "static",
     alignItems: "center",
+    top: 20,
   },
   button: {
     justifyContent: "center",
