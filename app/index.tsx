@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import getPages from "@/hooks/getPages";
 import { FontAwesome } from "@expo/vector-icons";
 import getFiltered from "@/hooks/getFiltered";
+import { Link } from "expo-router";
 
 export default function Index() {
   const [characters, setCharacters] = useState<Person[]>([]);
