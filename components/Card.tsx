@@ -8,7 +8,7 @@ function ModalStatusComponent({
   status,
   text,
 }: {
-  status: string;
+  status: "medkit" | "group" | "font" | "transgender-alt" | "home" | "map-pin";
   text: string;
 }) {
   return (
@@ -134,7 +134,7 @@ const EpisodeComponent: React.FC<CharacterComponentProps> = ({ episodes }) => {
 };
 
 export default function Card(person: Person) {
-  const [modalVisible, setModalVisible] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
   return (
     <View style={styles.card}>
       {modalVisible ? (
