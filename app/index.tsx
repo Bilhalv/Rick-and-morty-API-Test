@@ -82,7 +82,8 @@ export default function Index() {
             flexDirection: "row", 
             flexWrap: "wrap", 
             justifyContent: "center",
-            marginBottom: 50
+            marginBottom: 50,
+            marginTop: 20
           }}>
             {characters.map((person: Person) => (
               <Card key={person.id} {...person} />
