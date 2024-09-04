@@ -75,9 +75,15 @@ export default function Index() {
           <FontAwesome name="plus" size={20} color="white" />
         </View>
       </View>
-      <ScrollView contentContainerStyle={{ paddingVertical: 20 }}>
+      <ScrollView>
         {characters && characters.length > 0 ? (
-          <View style={{ gap: 20, flexDirection: "row", flexWrap: "wrap", justifyContent: "center" }}>
+          <View style={{ 
+            gap: 20, 
+            flexDirection: "row", 
+            flexWrap: "wrap", 
+            justifyContent: "center",
+            marginBottom: 50
+          }}>
             {characters.map((person: Person) => (
               <Card key={person.id} {...person} />
             ))}
@@ -116,6 +122,7 @@ const styles = StyleSheet.create({
     position: "static",
     alignItems: "center",
     top: 20,
+    zIndex: 100,
   },
   button: {
     justifyContent: "center",
