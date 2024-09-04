@@ -2,7 +2,7 @@ import { Person } from "@/types/Person";
 import { FontAwesome } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 
 function ModalStatusComponent({
   status,
@@ -120,7 +120,7 @@ const EpisodeComponent: React.FC<CharacterComponentProps> = ({ episodes }) => {
               size={24}
               color="white"
               onPress={() => {
-                if (curentPage === episodesFetched.length) return;
+                if (curentPage === Math.ceil(episodesFetched.length/5)) return;
                 setCurrentPage((prev) => prev + 1);
               }}
             />
@@ -138,7 +138,7 @@ export default function Card(person: Person) {
   return (
     <View style={styles.card}>
       {modalVisible ? (
-        <View style={styles.column}>
+        <>
           <View style={styles.row}>
             <View
               style={styles.view}
@@ -158,21 +158,29 @@ export default function Card(person: Person) {
           {person.type !== "" && (
             <ModalStatusComponent status={"font"} text={person.type} />
           )}
-          <ModalStatusComponent status={"transgender-alt"} text={person.gender} />
-          <ModalStatusComponent status={"home"} text={person.origin.name} />
-          <ModalStatusComponent status={"map-pin"} text={person.location.name} />
-          <EpisodeComponent episodes={person.episode} />
-        </View>
-      ) : (
-        <View onTouchStart={() => setModalVisible(!modalVisible)}>
-          <Text style={styles.text}>{person.name}</Text>
-          <Image
-            style={styles.Image}
-            source={{
-              uri: person.image,
-            }}
+          <ModalStatusComponent
+            status={"transgender-alt"}
+            text={person.gender}
           />
-        </View>
+          <ModalStatusComponent status={"home"} text={person.origin.name} />
+          <ModalStatusComponent
+            status={"map-pin"}
+            text={person.location.name}
+          />
+          <EpisodeComponent episodes={person.episode} />
+        </>
+      ) : (
+        <>
+          <Text style={styles.text}>{person.name}</Text>
+          <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
+            <Image
+              style={styles.Image}
+              source={{
+                uri: person.image,
+              }}
+            />
+          </TouchableOpacity>
+        </>
       )}
     </View>
   );
@@ -231,6 +239,7 @@ const styles = StyleSheet.create({
     elevation: 4,
     flexDirection: "column",
     justifyContent: "space-between",
+    width: "100%",
   },
   image: {
     height: 9,
