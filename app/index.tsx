@@ -7,6 +7,7 @@ import getPages from "@/hooks/getPages";
 import { FontAwesome } from "@expo/vector-icons";
 import getFiltered from "@/hooks/getFiltered";
 import { Link } from "expo-router";
+import { SortButton } from "@/components/Buttons";
 
 export default function Index() {
   const [characters, setCharacters] = useState<Person[]>([]);
@@ -31,9 +32,7 @@ export default function Index() {
         <View style={styles.button}>
           <FontAwesome name="filter" size={20} color="white" />
         </View>
-        <View style={styles.button}>
-          <FontAwesome name="sort" size={20} color="white" />
-        </View>
+        <SortButton />
         <View
           style={{
             flex: 1,
