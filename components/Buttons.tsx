@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
-import { Popover, Toggle, Card } from "@ui-kitten/components";
+import {
+  Popover,
+  Toggle,
+  Card,
+  RadioGroup,
+  Radio,
+  Button,
+} from "@ui-kitten/components";
 
 const styles = StyleSheet.create({
   button: {
@@ -21,7 +28,6 @@ interface SortButtonProps {
 
 export function SortButton(props: SortButtonProps) {
   const [visible, setVisible] = useState(false);
-  // ordenar lista por nome
   return (
     <>
       <Popover
@@ -51,5 +57,57 @@ export function SortButton(props: SortButtonProps) {
         </Card>
       </Popover>
     </>
+  );
+}
+
+interface FilterButtonProps {
+  onChange: (x: "Alive" | "Dead" | "unknown" | "any") => void;
+}
+
+export function FilterButton(props: FilterButtonProps) {
+  const [visible, setVisible] = useState(false);
+  const [status, setStatus] = useState<number>(0);
+  const statuses = ["Alive", "Dead", "unknown", "any"];
+
+  return (
+    <Popover
+      visible={visible}
+      anchor={() => (
+        <View style={styles.button} onTouchStart={() => setVisible(!visible)}>
+          <FontAwesome name="filter" size={20} color="white" />
+        </View>
+      )}
+      onBackdropPress={() => setVisible(false)}
+    >
+      <Card status="primary">
+        <Text
+          style={{
+            textAlign: "center",
+            fontWeight: "bold",
+            marginBottom: 10,
+          }}
+        >
+          Filter
+        </Text>
+        <RadioGroup
+          selectedIndex={status}
+          onChange={(value) => setStatus(value)}
+        >
+          {statuses.map((status) => (
+            <Radio key={status}>{status}</Radio>
+          ))}
+        </RadioGroup>
+        <Button
+          status="primary"
+          onPress={() =>
+            props.onChange(
+              statuses[status] as "Alive" | "Dead" | "unknown" | "any"
+            )
+          }
+        >
+          Filter
+        </Button>
+      </Card>
+    </Popover>
   );
 }

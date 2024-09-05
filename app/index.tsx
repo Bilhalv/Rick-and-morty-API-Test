@@ -13,7 +13,7 @@ import {
 import getPages from "@/hooks/getPages";
 import { FontAwesome } from "@expo/vector-icons";
 import getFiltered from "@/hooks/getFiltered";
-import { SortButton } from "@/components/Buttons";
+import { FilterButton, SortButton } from "@/components/Buttons";
 
 export default function Index() {
   const [characters, setCharacters] = useState<Person[]>([]);
@@ -21,28 +21,47 @@ export default function Index() {
   const [paginasCarregadas, setPaginasCarregadas] = useState(1);
   const [ordem, setOrdem] = useState(true);
   const [input, setInput] = useState("");
+  const [status, setStatus] = useState<"Alive" | "Dead" | "unknown" | "any">(
+    "any"
+  );
 
-  async function ChangeOrdem() {
-    setOrdem(!ordem);
-    const new_characters = getFiltered({ name: input });
-    if (!ordem) {
-      setCharacters(await new_characters);
+  const search = async (
+    name: string,
+    status?: "Alive" | "Dead" | "unknown" | "any"
+  ) => {
+    let new_characters;
+    if (status === "any") {
+      new_characters = await getFiltered({ name });
     } else {
-      setCharacters(await (await new_characters).sort((a, b) => a.name.localeCompare(b.name)));
+      new_characters = await getFiltered({ name, status });
     }
-  }
+    setCharacters(
+      !ordem
+        ? new_characters
+        : new_characters.sort((a, b) => a.name.localeCompare(b.name))
+    );
+  };
 
-  async function OnSearch(text: string) {
+  const onSearch = async (text: string) => {
     setInput(text);
-    const new_characters = getFiltered({ name: text });
-    setCharacters(await new_characters);
-    setOrdem(true);
-  }
+    await search(text, status);
+  };
+
+  const onFilter = async (status: "Alive" | "Dead" | "unknown" | "any") => {
+    setStatus(status);
+    await search(input, status);
+  };
+
+  const onOrder = async () => {
+    setOrdem(!ordem);
+    await search(input, status);
+  };
 
   async function fetchCharacters(page: number, asc?: boolean) {
     const new_characters = await getCharacters(page, asc);
     setCharacters(new_characters);
   }
+
   useEffect(() => {
     fetchCharacters(1);
   }, []);
@@ -50,10 +69,8 @@ export default function Index() {
   return (
     <>
       <View style={styles.header}>
-        <View style={styles.button}>
-          <FontAwesome name="filter" size={20} color="white" />
-        </View>
-        <SortButton checked={ordem} onChange={ChangeOrdem} />
+        <FilterButton onChange={onFilter} />
+        <SortButton checked={ordem} onChange={onOrder} />
         <View
           style={{
             flex: 1,
@@ -82,7 +99,7 @@ export default function Index() {
             placeholderTextColor={"#ffffff"}
             style={{ flex: 1, color: "white" }}
             editable
-            onSubmitEditing={(text) => OnSearch(text.nativeEvent.text)}
+            onSubmitEditing={(text) => onSearch(text.nativeEvent.text)}
             onFocus={() => {
               console.log("focus");
             }}
@@ -129,7 +146,11 @@ export default function Index() {
             )}
           </View>
         ) : (
-          <Text style={{ color: "#ffffff" }}>No characters found</Text>
+          <Text
+            style={{ color: "#ffffff", textAlign: "center", marginTop: 20 }}
+          >
+            No characters found
+          </Text>
         )}
       </ScrollView>
     </>
