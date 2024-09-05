@@ -1,13 +1,11 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { View } from "react-native";
 import { Slot } from "expo-router";
-import getPages from "@/hooks/getPages";
-import { useState, useEffect } from "react";
-import { NativeBaseProvider } from 'native-base';
+import * as eva from '@eva-design/eva';
+import { ApplicationProvider } from '@ui-kitten/components';
 
 export default function RootLayout() {
   return (
-    <NativeBaseProvider>
+    <ApplicationProvider {...eva} theme={eva.light}>
       <View
         style={{
           backgroundColor: "#272B33",
@@ -19,6 +17,6 @@ export default function RootLayout() {
       >
         <Slot />
       </View>
-    </NativeBaseProvider>
+    </ApplicationProvider>
   );
 }

@@ -2,27 +2,48 @@ import React, { useState, useEffect } from "react";
 import Card from "@/components/Card";
 import getCharacters from "@/hooks/getCharacters";
 import { Person } from "@/types/Person";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import getPages from "@/hooks/getPages";
 import { FontAwesome } from "@expo/vector-icons";
 import getFiltered from "@/hooks/getFiltered";
-import { Link } from "expo-router";
 import { SortButton } from "@/components/Buttons";
 
 export default function Index() {
   const [characters, setCharacters] = useState<Person[]>([]);
   const inputRef = React.useRef<TextInput>(null);
   const [paginasCarregadas, setPaginasCarregadas] = useState(1);
+  const [ordem, setOrdem] = useState(true);
+  const [input, setInput] = useState("");
 
+  async function ChangeOrdem() {
+    setOrdem(!ordem);
+    const new_characters = getFiltered({ name: input });
+    if (!ordem) {
+      setCharacters(await new_characters);
+    } else {
+      setCharacters(await (await new_characters).sort((a, b) => a.name.localeCompare(b.name)));
+    }
+  }
+
+  async function OnSearch(text: string) {
+    setInput(text);
+    const new_characters = getFiltered({ name: text });
+    setCharacters(await new_characters);
+    setOrdem(true);
+  }
+
+  async function fetchCharacters(page: number, asc?: boolean) {
+    const new_characters = await getCharacters(page, asc);
+    setCharacters(new_characters);
+  }
   useEffect(() => {
-    async function fetchPages(page: number) {
-      const pages = await getPages();
-      return pages < page
-    }
-    async function fetchCharacters(page: number) {
-      const new_characters = await getCharacters(page);
-      setCharacters((prev) => [...prev, ...new_characters]);
-    }
     fetchCharacters(1);
   }, []);
 
@@ -32,7 +53,7 @@ export default function Index() {
         <View style={styles.button}>
           <FontAwesome name="filter" size={20} color="white" />
         </View>
-        <SortButton />
+        <SortButton checked={ordem} onChange={ChangeOrdem} />
         <View
           style={{
             flex: 1,
@@ -61,10 +82,7 @@ export default function Index() {
             placeholderTextColor={"#ffffff"}
             style={{ flex: 1, color: "white" }}
             editable
-            onSubmitEditing={async (e) => {
-              const characters = await getFiltered({ name: e.nativeEvent.text });
-              setCharacters(characters);
-            }}
+            onSubmitEditing={(text) => OnSearch(text.nativeEvent.text)}
             onFocus={() => {
               console.log("focus");
             }}
@@ -76,14 +94,16 @@ export default function Index() {
       </View>
       <ScrollView>
         {characters && characters.length > 0 ? (
-          <View style={{ 
-            gap: 20, 
-            flexDirection: "row", 
-            flexWrap: "wrap", 
-            justifyContent: "center",
-            marginBottom: 50,
-            marginTop: 20
-          }}>
+          <View
+            style={{
+              gap: 20,
+              flexDirection: "row",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              marginBottom: 50,
+              marginTop: 20,
+            }}
+          >
             {characters.map((person: Person) => (
               <Card key={person.id} {...person} />
             ))}
@@ -96,8 +116,10 @@ export default function Index() {
                   height: 100,
                 }}
                 onPress={async () => {
-                  if (paginasCarregadas+1 > await getPages()) return;
-                  const newCharacters = await getCharacters(paginasCarregadas + 1);
+                  if (paginasCarregadas + 1 > (await getPages())) return;
+                  const newCharacters = await getCharacters(
+                    paginasCarregadas + 1
+                  );
                   setCharacters((prev) => [...prev, ...newCharacters]);
                   setPaginasCarregadas((prev) => prev + 1);
                 }}

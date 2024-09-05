@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { Popover } from "native-base";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Popover, Toggle, Card } from "@ui-kitten/components";
 
 const styles = StyleSheet.create({
   button: {
@@ -14,30 +14,42 @@ const styles = StyleSheet.create({
   },
 });
 
-export function SortButton() {
-  const [isOpen, setIsOpen] = useState(false);
+interface SortButtonProps {
+  checked: boolean;
+  onChange: () => void;
+}
 
+export function SortButton(props: SortButtonProps) {
+  const [visible, setVisible] = useState(false);
+  // ordenar lista por nome
   return (
-    <Popover
-      isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
-      trigger={(triggerProps) => {
-        return (
-          <View style={styles.button}>
+    <>
+      <Popover
+        visible={visible}
+        anchor={() => (
+          <View style={styles.button} onTouchStart={() => setVisible(!visible)}>
             <FontAwesome name="sort" size={20} color="white" />
           </View>
-        );
-      }}
-    >
-      <Popover.Content accessibilityLabel="Delete Customerd" w="56">
-        <Popover.Arrow />
-        <Popover.CloseButton />
-        <Popover.Header>Delete Customer</Popover.Header>
-        <Popover.Body>
-          This will remove all data relating to Alex. This action cannot be
-          reversed. Deleted data can not be recovered.
-        </Popover.Body>
-      </Popover.Content>
-    </Popover>
+        )}
+        onBackdropPress={() => setVisible(false)}
+      >
+        <Card status="primary">
+          <Text
+            style={{
+              textAlign: "center",
+              fontWeight: "bold",
+              marginBottom: 10,
+            }}
+          >
+            Sort
+          </Text>
+          <View>
+            <Toggle checked={props.checked} onChange={props.onChange}>
+              {props.checked ? "Normal" : "Decrescente"}
+            </Toggle>
+          </View>
+        </Card>
+      </Popover>
+    </>
   );
 }
