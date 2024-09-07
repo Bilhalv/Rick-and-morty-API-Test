@@ -13,8 +13,8 @@ import {
 import getPages from "@/hooks/getPages";
 import { FontAwesome } from "@expo/vector-icons";
 import getFiltered from "@/hooks/getFiltered";
-import { FilterButton, SortButton } from "@/components/Buttons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AddButton, FilterButton, SortButton } from "@/components/Buttons";
+import * as FileSystem from "expo-file-system";
 
 export default function Index() {
   const [characters, setCharacters] = useState<Person[]>([]);
@@ -38,22 +38,23 @@ export default function Index() {
       new_characters = await getFiltered({ name, status });
     }
     setCharacters(
-      !ordem
-        ? new_characters
-        : new_characters.sort((a, b) => a.name.localeCompare(b.name))
+      getMergedCharacters(
+        !ordem
+          ? new_characters
+          : new_characters.sort((a, b) => a.name.localeCompare(b.name))
+      )
     );
-    // setCharacters(getMergedCharacters());
   };
 
-  const onEditCharacter = (character: Person) => {
-    const existingEdit = localEdits.find((edit) => edit.id === character.id);
-    if (existingEdit) {
-      setLocalEdits((prevEdits) =>
-        prevEdits.map((edit) => (edit.id === character.id ? character : edit))
-      );
-    } else {
-      setLocalEdits([...localEdits, character]);
-    }
+  const onEditCharacter = async (character: Person) => {
+    const newLocal = localEdits.filter((edit) => edit.id !== character.id);
+    setLocalEdits([...newLocal, character]);
+    await FileSystem.writeAsStringAsync(
+      FileSystem.documentDirectory + "localEdits.json",
+      JSON.stringify(
+        localEdits.map((edit) => (edit.id === character.id ? character : edit))
+      )
+    );
   };
 
   const onSearch = async (text: string) => {
@@ -71,45 +72,25 @@ export default function Index() {
     await search(input, status);
   };
 
-  const getMergedCharacters = () => {
-    const mergedCharacters = characters.map((character) => {
+  const getMergedCharacters = (array: Person[]) => {
+    return array.map((character) => {
       const edit = localEdits.find((edit) => edit.id === character.id);
-      if (edit) {
-        return edit;
-      } else {
-        return character;
-      }
+      return edit || character;
     });
-
-    return mergedCharacters;
   };
 
   async function fetchCharacters(page: number, asc?: boolean) {
     const new_characters = await getCharacters(page, asc);
-    setCharacters(new_characters);
-    // setCharacters(getMergedCharacters());
+    setCharacters(getMergedCharacters(new_characters));
   }
-
-  async function loadLocalEdits() {
-    try {
-      const savedEdits = await AsyncStorage.getItem("localEdits");
-      if (savedEdits) {
-        setLocalEdits(JSON.parse(savedEdits));
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  useEffect(() => {
-    fetchCharacters(1);
-    loadLocalEdits();
-  }, []);
 
   useEffect(() => {
     const saveLocalEdits = async () => {
       try {
-        await AsyncStorage.setItem("localEdits", JSON.stringify(localEdits));
+        await FileSystem.writeAsStringAsync(
+          FileSystem.documentDirectory + "localEdits.json",
+          JSON.stringify(localEdits)
+        );
       } catch (error) {
         console.error(error);
       }
@@ -117,6 +98,33 @@ export default function Index() {
 
     saveLocalEdits();
   }, [localEdits]);
+
+  useEffect(() => {
+    fetchCharacters(1);
+    const loadLocalEdits = async () => {
+      try {
+        const value = await FileSystem.readAsStringAsync(
+          FileSystem.documentDirectory + "localEdits.json"
+        );
+        if (value) {
+          setLocalEdits(JSON.parse(value));
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadLocalEdits();
+  }, [
+    FileSystem.readAsStringAsync(
+      FileSystem.documentDirectory + "localEdits.json"
+    ),
+  ]);
+
+  function onAddCharacter(x: Person) {
+    setLocalEdits([...localEdits, x]);
+    setCharacters([x, ...characters]);
+  }
 
   return (
     <>
@@ -152,14 +160,9 @@ export default function Index() {
             style={{ flex: 1, color: "white" }}
             editable
             onSubmitEditing={(text) => onSearch(text.nativeEvent.text)}
-            onFocus={() => {
-              console.log("focus");
-            }}
           />
         </View>
-        <View style={styles.button}>
-          <FontAwesome name="plus" size={20} color="white" />
-        </View>
+        <AddButton onAdd={onAddCharacter} />
       </View>
       <ScrollView>
         {characters && characters.length > 0 ? (
@@ -174,7 +177,7 @@ export default function Index() {
             }}
           >
             {characters.map((person: Person) => (
-              <Card key={person.id} {...person} />
+              <Card key={person.id} person={person} onEdit={onEditCharacter} />
             ))}
             {characters.length > 9 && (
               <TouchableOpacity

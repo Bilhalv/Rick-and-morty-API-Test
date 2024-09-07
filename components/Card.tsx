@@ -1,20 +1,34 @@
 import { Person } from "@/types/Person";
 import { FontAwesome } from "@expo/vector-icons";
-import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
+import { TrashButton } from "./Buttons";
+import * as FileSystem from "expo-file-system";
 
 function ModalStatusComponent({
   status,
   text,
+  onChangeText,
 }: {
   status: "medkit" | "group" | "font" | "transgender-alt" | "home" | "map-pin";
   text: string;
+  onChangeText: (text: string) => void;
 }) {
   return (
     <View style={styles.row2}>
       <FontAwesome name={status} size={24} color="white" />
-      <Text style={styles.text2}>{text}</Text>
+      <TextInput
+        style={styles.text2}
+        value={text}
+        onChangeText={onChangeText}
+      />
     </View>
   );
 }
@@ -120,7 +134,8 @@ const EpisodeComponent: React.FC<CharacterComponentProps> = ({ episodes }) => {
               size={24}
               color="white"
               onPress={() => {
-                if (curentPage === Math.ceil(episodesFetched.length/5)) return;
+                if (curentPage === Math.ceil(episodesFetched.length / 5))
+                  return;
                 setCurrentPage((prev) => prev + 1);
               }}
             />
@@ -133,8 +148,18 @@ const EpisodeComponent: React.FC<CharacterComponentProps> = ({ episodes }) => {
   );
 };
 
-export default function Card(person: Person) {
+interface CardProps {
+  person: Person;
+  onEdit: (person: Person) => void;
+}
+
+export default function Card({ person, onEdit }: CardProps) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [localPerson, setLocalPerson] = useState<Person>(person);
+
+  async function onDelete(x: Person) {
+    onEdit({ ...x, name: "Null" });
+  }
   return (
     <View style={styles.card}>
       {modalVisible ? (
@@ -147,31 +172,74 @@ export default function Card(person: Person) {
               <FontAwesome name="arrow-left" size={24} color="white" />
             </View>
             <View style={styles.view2}>
-              <Text style={styles.text}>{person.name}</Text>
+              <TextInput
+                style={styles.text}
+                value={localPerson.name}
+                onChangeText={(value) =>
+                  setLocalPerson((prev) => ({ ...prev, name: value }))
+                }
+              />
             </View>
-            <View style={styles.view}>
+            <View style={styles.view} onTouchStart={() => onEdit(localPerson)}>
               <FontAwesome name="edit" size={24} color="white" />
             </View>
+            <TrashButton onDelete={() => onDelete(localPerson)} />
           </View>
-          <ModalStatusComponent status={"medkit"} text={person.status} />
-          <ModalStatusComponent status={"group"} text={person.species} />
-          {person.type !== "" && (
-            <ModalStatusComponent status={"font"} text={person.type} />
+          <ModalStatusComponent
+            status={"medkit"}
+            text={localPerson.status}
+            onChangeText={(value) =>
+              setLocalPerson((prev) => ({ ...prev, status: value }))
+            }
+          />
+          <ModalStatusComponent
+            status={"group"}
+            text={localPerson.species}
+            onChangeText={(value) =>
+              setLocalPerson((prev) => ({ ...prev, species: value }))
+            }
+          />
+          {localPerson.type !== "" && (
+            <ModalStatusComponent
+              status={"font"}
+              text={localPerson.type}
+              onChangeText={(value) =>
+                setLocalPerson((prev) => ({ ...prev, type: value }))
+              }
+            />
           )}
           <ModalStatusComponent
             status={"transgender-alt"}
-            text={person.gender}
+            text={localPerson.gender}
+            onChangeText={(value) =>
+              setLocalPerson((prev) => ({ ...prev, gender: value }))
+            }
           />
-          <ModalStatusComponent status={"home"} text={person.origin.name} />
+          <ModalStatusComponent
+            status={"home"}
+            text={localPerson.origin?.name ?? ""}
+            onChangeText={(value) =>
+              setLocalPerson((prev) => ({
+                ...prev,
+                origin: { ...prev.origin, name: value },
+              }))
+            }
+          />
           <ModalStatusComponent
             status={"map-pin"}
-            text={person.location.name}
+            text={localPerson.location?.name ?? ""}
+            onChangeText={(value) =>
+              setLocalPerson((prev) => ({
+                ...prev,
+                location: { ...prev.location, name: value },
+              }))
+            }
           />
-          <EpisodeComponent episodes={person.episode} />
+          <EpisodeComponent episodes={localPerson.episode ?? []} />
         </>
       ) : (
         <>
-          <Text style={styles.text}>{person.name}</Text>
+          <Text style={styles.text}>{localPerson.name}</Text>
           <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
             <Image
               style={styles.Image}
