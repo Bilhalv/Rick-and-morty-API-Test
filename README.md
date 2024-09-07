@@ -1,50 +1,40 @@
-a# Welcome to your Expo app 👋
+# Expo App Template
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is a basic template for an Expo app, created with `create-expo-app`. It includes a basic directory structure and some example code to get you started.
 
-## Get started
+## Getting Started
 
-1. Install dependencies
+To get started with this project, follow these steps:
 
-   ```bash
-   npm install
-   ```
+1. Install dependencies: `npm install`
+2. Start the app: `npx expo start`
+3. Open the app on Expo Go any other mobile emulator folowing the instructions on the console!
 
-2. Start the app
+## Project Structure
 
-   ```bash
-    npx expo start
-   ```
+This project uses a basic directory structure:
 
-In the output, you'll find options to open the app in a
+* `app`: This is where you'll find the main code for your app.
+* `components`: This directory contains reusable React components.
+* `hooks`: This directory contains custom React hooks.
+* `types`: This directory contains type definitions for your app.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Features
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+This template includes the following features:
 
-## Get a fresh project
+* A basic app layout with a header and a scrollable content area
+* A search bar with a filter button
+* A list of characters with a "Add" button
+* A detail page for each character
 
-When you're ready, run:
+## Resources
 
-```bash
-npm run reset-project
-```
+* [Expo Documentation](https://docs.expo.dev/)
+* [React Native Documentation](https://reactnative.dev/docs/getting-started)
+* [Expo Router Documentation](https://docs.expo.dev/router/introduction/)
+* [UI Kitten](https://akveo.github.io/react-native-ui-kitten/)
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## License
 
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This template is licensed under the MIT License.
