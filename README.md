@@ -1,6 +1,6 @@
-# Expo App Template
+# Rick and morty API Test
 
-This is a basic template for an Expo app, created with `create-expo-app`. It includes a basic directory structure and some example code to get you started.
+This is a basic Expo app, created with `create-expo-app`. With the needed features for a test.
 
 ## Getting Started
 
